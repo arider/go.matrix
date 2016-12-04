@@ -6,7 +6,9 @@ package matrix
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
+	"riderutil"
 	"testing"
 	"time"
 )
@@ -14,6 +16,10 @@ import (
 const ε = 0.000001
 const verbose = false
 const speedTest = true
+
+func AlmostEqual(a, b, close float64) bool {
+	return math.Abs(a-b) <= close
+}
 
 /* TEST: arithmetic.go */
 
@@ -798,3 +804,47 @@ func TestMultipleProduct(t *testing.T) {
 	}
 }
 */
+
+func TestMean(t *testing.T) {
+	ar := []float64{-2.1, -1., 4.3, 3., 1.1, 0.12}
+	A := MakeDenseMatrix(ar, 2, 3)
+
+	mean := A.Mean()
+	if !riderutil.ItemsAlmostEqualF64(mean, []float64{0.45, 0.05, 2.21}, .01) {
+		t.Fail()
+	}
+}
+
+func TestCovariance(t *testing.T) {
+	ar := []float64{-2.1, -1., 4.3, 3., 1.1, 0.12}
+	A := MakeDenseMatrix(ar, 2, 3)
+
+	cov := A.Covariance()
+
+	if !riderutil.ItemsAlmostEqualF64(cov.elements, []float64{13.005, 5.355, -10.659, 5.355, 2.205, -4.389, -10.659, -4.389, 8.7362}, .01) {
+		t.Fail()
+	}
+}
+
+func TestLog(t *testing.T) {
+	ar := []float64{1.0, 2.0, 3.0, 4.0, 5.0, 6.0}
+	A := MakeDenseMatrix(ar, 2, 3)
+
+	log := A.Log()
+
+	actual := []float64{0., 1.0, 1.5849625, 2., 2.32192809, 2.5849625}
+	if !riderutil.ItemsAlmostEqualF64(log.elements, actual, .01) {
+		t.Fail()
+	}
+}
+
+func TestPow(t *testing.T) {
+	ar := []float64{1.0, 2.0, 3.0, 4.0, 5.0, 6.0}
+	A := MakeDenseMatrix(ar, 2, 3)
+
+	pow := A.Pow(1.5)
+	actual := []float64{1., 2.82842712, 5.19615242, 8., 11.18033989, 14.69693846}
+	if !riderutil.ItemsAlmostEqualF64(pow.elements, actual, .01) {
+		t.Fail()
+	}
+}

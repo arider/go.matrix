@@ -5,6 +5,7 @@
 package matrix
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -343,3 +344,39 @@ func MakeDenseMatrixStacked(data [][]float64) *DenseMatrix {
 }
 
 func (A *DenseMatrix) String() string { return String(A) }
+
+func (A DenseMatrix) Mean() []float64 {
+	mean := make([]float64, A.Cols())
+	for ci := 0; ci < A.Cols(); ci++ {
+		for ri := 0; ri < A.Rows(); ri++ {
+			mean[ci] += A.Get(ri, ci)
+		}
+		mean[ci] /= float64(A.Rows())
+	}
+	return mean
+}
+
+/*
+Calculate the covariance of the matrix. Columns are variables.
+*/
+func (A DenseMatrix) Covariance() *DenseMatrix {
+	mean := A.Mean()
+	cov := Zeros(A.Cols(), A.Cols())
+
+	for ci := 0; ci < A.Cols(); ci++ {
+		for ici := ci; ici < A.Cols(); ici++ {
+			tmp := 0.0
+			for ri := 0; ri < A.Rows(); ri++ {
+				tmp += (A.Get(ri, ci) - mean[ci]) * (A.Get(ri, ici) - mean[ici])
+			}
+			fmt.Println("before", tmp)
+			tmp /= float64(A.Rows()) - 1
+			fmt.Println("after", tmp)
+			// Fill the upper triangle.
+			cov.Set(ci, ici, tmp)
+			// Fill the lower triangle.
+			cov.Set(ici, ci, tmp)
+		}
+	}
+	return cov
+}
